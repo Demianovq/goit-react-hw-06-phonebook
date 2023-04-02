@@ -1,57 +1,15 @@
-import { useState, useEffect } from 'react';
-import { nanoid } from 'nanoid';
+import { useDispatch } from 'react-redux';
 import { ContactList } from './Contacts/Contacts';
 import { FormContacts } from './form/form';
 import { Filter } from './Filter/Filter';
+import { addContact } from 'redux/contactsSlice';
 
 export const App = () => {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    const serializedState = JSON.stringify(contacts);
-    localStorage.setItem('contacts', serializedState);
-  }, [contacts]);
-
-  useEffect(() => {
-    const savedContacts = localStorage.getItem('contacts');
-    if (savedContacts) {
-      const parsedContacts = JSON.parse(savedContacts);
-      setContacts(parsedContacts);
-    }
-  }, []);
+  const dispatch = useDispatch();
 
   const handleSubmit = (values, { resetForm }) => {
-    let newContact = values;
-
-    const check = contacts.filter(
-      contact => contact.name.toLowerCase() === newContact.name.toLowerCase()
-    );
-
-    if (check.length) {
-      alert(`${newContact.name} is already in contacts`);
-    } else {
-      newContact.id = nanoid();
-      setContacts(prevState => [...prevState, newContact]);
-      resetForm();
-    }
-  };
-
-  const handleFilter = ({ target: { value } }) => {
-    setFilter(value);
-  };
-
-  const OnFilteredContacts = () => {
-    if (filter) {
-      return contacts.filter(({ name }) =>
-        name.toLowerCase().includes(filter.toLowerCase())
-      );
-    }
-    return;
-  };
-
-  const handleDelete = eId => {
-    setContacts(contacts.filter(({ id }) => id !== eId));
+    dispatch(addContact(values));
+    resetForm();
   };
 
   return (
@@ -60,12 +18,8 @@ export const App = () => {
       <FormContacts onFormSubmit={handleSubmit} />
 
       <h2>Contacts</h2>
-      <Filter onFilter={handleFilter} />
-      <ContactList
-        contacts={contacts}
-        filteredContacts={OnFilteredContacts()}
-        onDelete={handleDelete}
-      />
+      <Filter />
+      <ContactList />
     </div>
   );
 };

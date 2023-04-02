@@ -1,14 +1,25 @@
-import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
+import { getContacts, getFilter } from 'redux/selectors';
+import { ContactItem } from 'components/Contact/Contact';
 
-export const ContactList = ({ contacts, filteredContacts, onDelete }) => {
+export const ContactList = () => {
+  const contacts = useSelector(getContacts);
+  const filterValue = useSelector(getFilter);
+
+  const OnFilteredContacts = () => {
+    if (filterValue) {
+      return contacts.filter(contact =>
+        contact.text.name.toLowerCase().includes(filterValue.toLowerCase())
+      );
+    }
+    return;
+  };
+
   const renderAMarkUpList = array => {
-    return array.map(({ id, name, number }) => {
+    return array.map(contact => {
       return (
-        <li key={id} contactid={id}>
-          {name}: {number}
-          <button type="button" onClick={() => onDelete(id)}>
-            Delete
-          </button>
+        <li key={contact.id}>
+          <ContactItem contact={contact} />
         </li>
       );
     });
@@ -16,27 +27,9 @@ export const ContactList = ({ contacts, filteredContacts, onDelete }) => {
 
   return (
     <ul>
-      {filteredContacts
-        ? renderAMarkUpList(filteredContacts)
+      {filterValue
+        ? renderAMarkUpList(OnFilteredContacts())
         : renderAMarkUpList(contacts)}
     </ul>
   );
-};
-
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  filteredContacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-  onDelete: PropTypes.func.isRequired,
 };
